@@ -4,7 +4,16 @@
 
 using namespace std; //Since we can only use std only, i allow for using namespace;
 
-/* OS specified call */ // I still need to refer to lecture
+/* OS specified call */
+#if _WIN32
+\\#include <window.h>
+#warning "Window is Bad Bad."
+#elif (__linux__||__unix__)
+\\#include <unistd.h>
+\\#include <stdio_ext.h>
+#else 
+#error "Mac, Haiku? Is that you?"
+#endif
 
 namespace Kawaii {
   /* include your inside custom namespace for safety reason;
