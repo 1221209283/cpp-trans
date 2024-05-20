@@ -6,11 +6,11 @@ using namespace std; //Since we can only use std only, i allow for using namespa
 
 /* OS specified call */
 #if _WIN32
-\\#include <window.h>
+//#include <window.h>
 #warning "Window is Bad Bad."
 #elif (__linux__||__unix__)
-\\#include <unistd.h>
-\\#include <stdio_ext.h>
+//#include <unistd.h>
+//#include <stdio_ext.h>
 #else 
 #error "Mac, Haiku? Is that you?"
 #endif
