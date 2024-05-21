@@ -11,8 +11,9 @@ using namespace std; //Since we can only use std only, i allow for using namespa
 #elif (__linux__||__unix__)
 //#include <unistd.h>
 //#include <stdio_ext.h>
+#warning "Gay Linux is Good Linux!!"
 #else 
-#error "Mac, Haiku? Is that you?"
+// #error "Mac, Haiku? Is that you?"
 #endif
 
 namespace Kawaii {
@@ -20,9 +21,9 @@ namespace Kawaii {
    * Do not create function outside the namespace then include inside; (why would you do that!?)
    * void Kawaii::function(){} is a big no no when you can put it inside!! (don't make stuff complex)
    * Valid function will pull out of namespace.
-  */
+  */ 
 }
 
-int main(int argc, char* argv){
+int main(int argc, char* argv[]){
   return 0;
 }
