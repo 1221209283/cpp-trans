@@ -26,7 +26,7 @@ namespace Kawaii {
    * void Kawaii::function(){} is a big no no when you can put it inside!! (don't make stuff complex)
    * Valid function will pull out of namespace.
   */
-  bool choice(string choice = "\0"){
+  bool choice(string choice = "\0"){ // optional parameter, wooo~
     unsigned short good = 0, bad = 0;
     if(choice == "\0") {
       choice.erase();
@@ -64,12 +64,8 @@ namespace Kawaii {
       void change_name();
 
     public:
-      Person()
-      :legacy_sex(false)
-      ,age(0)
-      {}
-
-      ~Person() = default;
+      Person() = default; // don't touch
+      ~Person() = default; // don't touch
 
       /*accessor*/
 
@@ -89,6 +85,12 @@ namespace Kawaii {
 
   class Customer : public Person {
     public:
+      Customer() = default; // No touch
+      ~Customer() = default; // No touch
+
+      Customer(const bool x){
+        
+      }
       friend class Admin;
   };
 
@@ -96,11 +98,14 @@ namespace Kawaii {
       char status = '\0';
     public:
 
+      Admin() = default; //do not write
+
       Admin(const bool x) {
         if(!x) return;
         change_sex();
         change_name();
         change_age();
+        change_status();
       }
       Admin(const bool& legacy_sex,const string& name,const unsigned short& age,const char& status) { // init list to modify local class not inherited class
         this->legacy_sex = legacy_sex;
@@ -109,7 +114,7 @@ namespace Kawaii {
         this->status = status;
       }
       ~Admin() {
-        cout << "Admin : " << name << " Destroyed !" << endl;
+        cout << "Admin -> " << name << " Destroyed !" << endl;
       }
 
       int change_name(){
@@ -159,7 +164,7 @@ namespace Kawaii {
           }
         }
         if((good + bad) > 1) {
-          cerr << "Error Gender!!" << endl;
+          cerr << "Error Sex!!" << endl;
           return -1;
         }
         if((good + bad) == 0) good++;
@@ -191,18 +196,34 @@ namespace Kawaii {
         return status;
       }
 
-      void Details() const {
-        cout << "=Admin=" << '\n'
-          << "Name : " << name << '\n'
-          << "Sex  : " << ((legacy_sex == false) ? "Female" : "Male") << '\n'
-          << "Age  : " << age << '\n'
-          << "Status " << status << endl;
+      string Check_Status() const {
+        switch(status){
+          case 'a':
+            return "Active";
+        }
+        return "None";
       }
 
+      void Details() const {
+        cout << "=Admin=" << '\n'
+          << "Name   : " << name << '\n'
+          << "Sex    : " << ((legacy_sex == false) ? "Female" : "Male") << '\n'
+          << "Age    : " << age << '\n'
+          << "Status : " << Check_Status() << endl;
+      }
+
+      int Edit_Cust(Customer& cust) {
+        return 0;
+      }
+  };
+  class Menu { //refer to plan
+      //
+    public:
+      Menu();
   };
 }
 
-int main(int argc, char* argv[]){
+int main(int argc, char* argv[]){ // Halt revise the planing
   Kawaii::Admin a(true);
   a.Details();
   return 0;
