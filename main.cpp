@@ -1,7 +1,7 @@
 #include <iostream>
 #include <iomanip>
 #include <limits>
-#include <array> // I like vector bcs it not fixed
+#include <array> // I like vector bcs it not fixed (not used)
 
 using namespace std; //Since we can only use std only, i allow for using namespace;
 
@@ -32,7 +32,7 @@ namespace Kawaii {
       choice.erase();
       getline(cin,choice);
     }
-    for(const char& i:choice){
+    for(const char& i:choice){// this function only send for false input, does not warn
       switch(i){
         case '\n':
         case ' ':
@@ -51,7 +51,7 @@ namespace Kawaii {
           bad++;
       }
     }
-    if(good == 0) good++;
+    if(good == 0) good++; // if the user does not enter any thing, program auto default;
     return (good == 1 && bad == 0);
   }
 
@@ -61,69 +61,13 @@ namespace Kawaii {
       string name;
       unsigned short age = 0;
 
-      void change_name();
-
-    public:
-      Person() = default; // don't touch
-      ~Person() = default; // don't touch
-
-      /*accessor*/
-
-      bool Sex() const {
-        return legacy_sex;
-      }
-
-      string Name() const {
-        return name;
-      }
-
-      unsigned short Age() const {
-        return age;
-      }
-
-  };
-
-  class Customer : public Person {
-    public:
-      Customer() = default; // No touch
-      ~Customer() = default; // No touch
-
-      Customer(const bool x){
-        
-      }
-      friend class Admin;
-  };
-
-  class Admin : public Person {
-      char status = '\0';
-    public:
-
-      Admin() = default; //do not write
-
-      Admin(const bool x) {
-        if(!x) return;
-        change_sex();
-        change_name();
-        change_age();
-        change_status();
-      }
-      Admin(const bool& legacy_sex,const string& name,const unsigned short& age,const char& status) { // init list to modify local class not inherited class
-        this->legacy_sex = legacy_sex;
-        this->name = name;
-        this->age = age;
-        this->status = status;
-      }
-      ~Admin() {
-        cout << "Admin -> " << name << " Destroyed !" << endl;
-      }
-
-      int change_name(){
+      int set_name(){ // unsafe design
         cout << "Insert Name : "; //user input flow will be revised!!
         getline(cin,name);
         return 0;
       }
 
-      int change_age() {
+      int set_age() {
         cout << "Insert Age : ";
         if(!(cin >> age)){ // revise here very very important!!!
           cerr << "Error Input!!" << endl;
@@ -134,7 +78,7 @@ namespace Kawaii {
         return 0;
       }
 
-      int change_sex() {
+      int set_sex() {
         unsigned short good = 0, bad = 0;
         string input;
         cout << "Insert Sex [F/m] : ";
@@ -172,10 +116,108 @@ namespace Kawaii {
         return 0;
       }
 
-      int change_status() {
+    public:
+      Person() = default; // don't touch
+      ~Person() = default; // don't touch
+
+      /*accessor*/
+
+      bool Sex() const {
+        return legacy_sex;
+      }
+
+      string Name() const {
+        return name;
+      }
+
+      unsigned short Age() const {
+        return age;
+      }
+
+  };
+
+  class Customer : public Person { // must revised
+    public:
+      Customer() = default; // No touch
+      ~Customer() = default; // No touch
+
+      Customer(const bool x){
+        
+      }
+      friend class Admin;
+  };
+
+  class Admin : public Person {
+      char status = '\0';
+    protected:
+
+      int set_status() {
         cout << "Insert Status : ";
+        cin >> status;
+        cin.ignore(MAX_STREAM_SIZE,'\n');
         return 0;
-      } 
+      }
+
+    public:
+
+      Admin() = default; //do not write
+
+      Admin(const bool&& x) {
+        if(!x) return;
+        (void) set_sex();
+        (void) set_name();
+        (void) set_age();
+        (void) set_status();
+      }
+      Admin(const bool& legacy_sex,const string& name,const unsigned short& age,const char& status) { // init list to modify local class not inherited class
+        this->legacy_sex = legacy_sex;
+        this->name = name;
+        this->age = age;
+        this->status = status;
+      }
+
+      Admin(const Admin& A) {
+        this->legacy_sex = A.legacy_sex;
+        this->name = A.name;
+        this->age = A.age;
+        this->status = A.status;
+      }
+
+      ~Admin() {
+        cout << "Admin -> " << name << " <- Destroyed !" << endl;
+      }
+
+      int change_sex(){
+        do{
+          set_sex();
+          cout<<"Confirm!? [Y/n] ";
+        } while(!choice());
+        return 0;
+      }
+
+      int change_name(){
+        do{
+          set_name();
+          cout<<"Confirm!? [Y/n] ";
+        } while(!choice());
+        return 0;
+      }
+
+      int change_age(){
+        do{
+          set_age();
+          cout<<"Confirm!? [Y/n] ";
+        } while(!choice());
+        return 0;
+      }
+
+      int change_status(){
+        do{
+          set_status();
+          cout<<"Confirm!? [Y/n] ";
+        } while(!choice());
+        return 0;
+      }
 
       void change_sex(const bool& legacy_sex){
         this->legacy_sex = legacy_sex;
@@ -198,8 +240,10 @@ namespace Kawaii {
 
       string Check_Status() const {
         switch(status){
-          case 'a':
+          case 'A':
             return "Active";
+          case 'I':
+            return "Inactive";
         }
         return "None";
       }
@@ -216,15 +260,67 @@ namespace Kawaii {
         return 0;
       }
   };
+
+  struct Login_Data { // Not Safe 0n0``!!
+    string name;
+    string passcode;
+    string level;
+    Login_Data* previous = nullptr;
+    Login_Data* next = nullptr;
+
+    Login_Data(){
+      cerr << "Wrong call" <<endl;
+    }
+
+    Login_Data(const string name = "",const string passcode = "",const string level = ""){
+      this->name = name;
+      this->passcode = passcode;
+      this->level =level;
+    }
+
+    Login_Data(Login_Data* const ptr,const string name = "",const string passcode = "",const string level = ""){
+      this->previous = ptr;
+      this->name = name;
+      this->passcode = passcode;
+      this->level = level;
+    }
+
+    ~Login_Data(){
+      Login_Data* ptr; //Incase of Stupid Action
+      cout << "Alert !! Read Warning Below!!" << '\n' 
+        << "You has callout of Deletion of this Memory Sector, Deletion is imminent!!" << '\n'
+        << "You are unable to prevent the deletion of this this data but to ensure the intergrity of the rest of data." << '\n'
+        << "We making sure of the pointer still pointing to rest of the data." << '\n'
+        << "If you inssist purging the pointer, we will terminate the whole sector of data for memory leak!!" << endl;
+    }
+  };
+
+  class Login {
+      Login_Data* ptr = nullptr;
+    public:
+
+      Login(){
+        //code
+      }
+      void Logout(){
+        //erase code
+      }
+  };
+
   class Menu { //refer to plan
       //
     public:
       Menu();
+
+      
   };
 }
 
 int main(int argc, char* argv[]){ // Halt revise the planing
-  Kawaii::Admin a(true);
-  a.Details();
+  Kawaii::Admin* a = new Kawaii::Admin(true);
+  a->Details();
+  a->change_sex();
+  a->Details();
+  delete a;
   return 0;
 }
