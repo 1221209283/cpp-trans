@@ -8,7 +8,7 @@
 #warning "Complied in Window"
 #elif (__linux__||__unix__)
 //#include <unistd.h>
-//#include <stdio_ext.h>
+//#include <st
 #warning "Complied in Linux / Unix"
 #else
 #warning "Complied in non-Unix system"
@@ -86,6 +86,14 @@ class customer {
     cout << "Phone: ";
     set_phone();
   }
+  
+  void display() const {
+    cout
+  << "Name :" << name << '\n'
+  << "Age  :" << age  << '\n'
+  << "Sex  :" << ((legacy_sex == 0)? "Female" : "Male") << '\n'
+  << "Phone:" << phone << endl;
+  }
 };
 
 class vehicle {
@@ -96,8 +104,8 @@ class vehicle {
   
 };
 
-void display(const unsigned short& person_num,  const customer* const arry_cust) {
-  
+void display(const unsigned short& person_num, const customer* const arry_cust) {
+
 }
 
 int main(int argc, char* argv[]){
@@ -114,7 +122,14 @@ int main(int argc, char* argv[]){
   cin.ignore(MAX_STREAM_SIZE,'\n');
 
   for(unsigned int i = 0;i < person_num;i++){
+    //cout << "\e[1J\e[;H";
+    cout<< "person #" << i+1 <<endl;
     arry_cust[i].input_field();
+  }
+  cout << endl;
+  for(unsigned int i = 0;i < person_num;i++){
+    cout << "Display: person #" << i+1 << endl;
+    arry_cust[i].display();
   }
   return 0;
 }
