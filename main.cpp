@@ -146,6 +146,7 @@ void display(const unsigned short& person_num, const customer* const arry_cust) 
 
 template <typename T>
 void int_input(T& a,string&& out = ""){
+  static_assert(false, "Use num_input");
   bool error_input = false, no_symbol = false;
   string input;
   do{
@@ -213,6 +214,7 @@ void unsign_input(T& a,string&& out = ""){
 
 template <typename  T>
 void float_input(T& a,string&& out = ""){
+  static_assert(false, "Use num_input");
   bool error_input = false, no_symbol = false, dot_format = false, lock_dot = false;
   string input;
   do{
