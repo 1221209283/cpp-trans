@@ -3,7 +3,7 @@
 //#include <string>
 #include <limits>
 #include <string>
-//lol
+
 /* OS specified call */
 #if _WIN32
 //#include <window.h>
