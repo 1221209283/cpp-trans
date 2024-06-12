@@ -137,6 +137,29 @@ class vehicle {
   
 };
 
+class Ferry : public vehicle 
+{
+public:
+    Ferry(unsigned short age)
+    {
+        if (age <= 12) price = 10;
+        else if (age <= 17) price = 15;
+        else if (age <= 60) price = 25;
+        else price = 12;
+    }
+
+    unsigned int get_price() const 
+    { 
+        return price; 
+    }
+
+    void display() const override
+    {
+        cout << "Ferry" << endl;
+    }
+};
+
+
 void display(const unsigned short& person_num, const customer* const arry_cust) {
 
 }
