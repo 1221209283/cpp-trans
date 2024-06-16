@@ -1,4 +1,6 @@
 #include <iostream>
+#include <istream>
+#include <sstream>
 #include <limits>
 #include <string>
 #include <type_traits>
@@ -16,6 +18,8 @@
 #endif
 
 //#error "Comment if you reviewed the code!! \n I dont want faulty code!!"
+
+// Zoom 4
 
 using namespace std;
 
@@ -36,8 +40,8 @@ class customer {
     string input;
     do{
       error_input = false;
-      input.erase();
-      cout << "Input Age : ";
+      input.clear();
+      cout << "|  Age                                 : ";
       getline(cin,input);
       if(input == ""){
         error_input = true;
@@ -49,7 +53,7 @@ class customer {
         }else if((int)i < 58 && (int)i > 47){
           continue;
         }else{
-          cerr << "\e[31mError Age!!\e[0m" << endl;
+          cerr << "\e[1;31mError Age!!\e[0m" << endl;
           error_input = true;
           break;
         }
@@ -59,7 +63,18 @@ class customer {
   }
 
   void set_phone() {
-    getline(cin,phone);
+    bool input_error = false;
+    do{
+      input_error = false;
+      phone.clear();
+      cout << "|  Phone                               : ";
+      getline(cin,phone);
+      if(phone.size() != 8) input_error = true;
+      for(const char& i:phone){
+        if((int)i < 33) continue;
+      }
+      if(input_error) cerr << "\e[1;31mError!! (Make sure enter 8-digits)\e[0m" << endl;
+    }while(input_error);
   }
 
   int set_sex() {
@@ -70,7 +85,7 @@ class customer {
       good = 0;
       bad = 0;
       input_error = false;
-      cout << "Insert Sex [f/m] : ";
+      cout << "|  Gender << F = Female : M = Male >>  : ";
       getline(cin,input);
       for(const char& i:input){
         switch(i) {
@@ -92,7 +107,7 @@ class customer {
             bad++;
             break;
           default:
-            cerr << "\e[31mError Input!!\e[0m" << endl;
+            cerr << "\e[1;31mError Input!!\e[0m" << endl;
             input_error = true;
         }
         if(input_error) break;
@@ -102,7 +117,7 @@ class customer {
 
       if((good+bad) == 1);
       else {
-        cerr << "\e[31mError Sex!!\e[0m" << endl; 
+        cerr << "\e[1;31mError Sex!!\e[0m" << endl; 
         input_error = true;
       }
 
@@ -112,193 +127,164 @@ class customer {
   }
 
   void input_field() {
-    cout << "Name : ";
+    cout << "|  Name                                : ";
     set_name();
     set_age();
     set_sex();
-    cout << "Phone: ";
     set_phone();
   }
   
   void display() const {
-    cout
-  << "Name :" << name << '\n'
-  << "Age  :" << age  << '\n'
-  << "Sex  :" << ((legacy_sex == 0)? "Female" : "Male") << '\n'
-  << "Phone:" << phone << endl;
   }
 };
 
 class vehicle {
+  protected:
   string name, from_destination , to_destination;
   unsigned int price = 0;
   public:
-  
-  
+  unsigned int get_price();
+  void display();
+
+  void choose_day();
+
 };
 
-class Ferry : public vehicle 
-{
-public:
-    Ferry(unsigned short age)
-    {
-        if (age <= 12) price = 10;
-        else if (age <= 17) price = 15;
-        else if (age <= 60) price = 25;
-        else price = 12;
-    }
+class Ferry : public vehicle {
+  public:
 
-    unsigned int get_price() const 
-    { 
-        return price; 
-    }
+  Ferry() = default;
 
-    void display() const override
-    {
-        cout << "Ferry" << endl;
-    }
+  Ferry(unsigned short age){
+    if (age <= 12) price = 10;
+    else if (age <= 17) price = 15;
+    else if (age <= 60) price = 25;
+    else price = 12;
+  }
+
+  unsigned int get_price() const { 
+    return price; 
+  }
+
+  void display() const {
+    cout << "Ferry" << endl;
+  }
+  /*
+  void display() const override { // example of AI faulty code
+    cout << "Ferry" << endl;
+  }
+  */
 };
-
-
-void display(const unsigned short& person_num, const customer* const arry_cust) {
-
-}
 
 //function covert num
 
 template <typename T>
-void unsign_input(T& a,string&& out = ""){
-  bool error_input = false, is_null = true;
+void new_num_input(T& a,string&& out = "input : "){
+  bool error_input;
   string input;
+  double test;
   do{
     error_input = false;
-    is_null = true;
-    input.erase();
+    input.clear();
     cout << out;
     getline(cin,input);
-    for(const char& i:input){
-      if((int)i < 33){
-        continue;
-      }else if((int)i < 58 && (int)i > 47){
-        is_null = false;
-        continue;
-      }else{
-        cerr << "\e[31mError Input!!\e[0m" << endl;
-        error_input = true;
-        break;
-      }
-    }
-    if(is_null) error_input = true;
-  }while(error_input);
-  a = (T)stoull(input);
-}
-
-template <typename T>
-void num_input(T& a,string&& out = "input : "){ // one big bloat function
-  static_assert(!is_unsigned_v<T>, "This Function cannot handle unsigned varaible !!");
-  bool error_input = false, no_symbol = false, dot_format = false, lock_dot = false, is_null = true;
-  string input;
-  do {
-    error_input = false;
-    no_symbol = false;
-    dot_format = false;
-    lock_dot = false;
-    is_null = true;
-    input.erase();
-    cout << out;
-    getline(cin, input);
-    for(const char& i:input){
-      if((int)i < 33) continue; //white space
-      if((int)i < 58 && (int)i > 47){ // check is number
-        no_symbol = true;
-        dot_format = true;
-        is_null = false;
-        continue;
-      }
-      switch (i) {
-        case '+':
-        case '-':
-          if(!no_symbol){ // make sure plus minus is on the first
-            no_symbol = true;
-          }else{
-            error_input = true;
-          }
-          break;
-        case '.':
-          if(dot_format && !lock_dot){ // make sure only one dot between number
-            lock_dot = true;
-            dot_format = false;
-          }else{
-            error_input = true;
-          }
-          break;
-        default:
-          error_input = true; // other words
-      }
-      if(error_input){
-        cerr << "\e[31mError Input!!\e[0m" << endl;
-        //cerr << no_symbol << dot_format << lock_dot << is_null << endl;
-        break;
-      }
-    }
-    if(is_null){
-      error_input = true; // check the string is empty that only contain whitespace
+    input.erase(0,input.find_first_not_of(" \t"));
+    input.erase(input.find_last_not_of(" \t")+1);
+    istringstream iss(input);
+    if(input.empty()){
+      error_input = true;
       continue;
     }
-    if(!dot_format){ // prevent empty number after .
-      cerr << "\e[31mError Input!!\e[0m" << endl;
+    if(!(iss >> test) || !iss.eof()){
+      cerr << "\e[1;31mError Input!!\e[0m" << endl;
+      error_input = true;
+      continue;
+    }
+    if(is_unsigned_v<T> && test < 0){
+      cerr << "\e[1;31mError Input!!\e[0m" << endl;
       error_input = true;
     }
-  }while (error_input);
-  if(is_integral_v<T>){
-    a = (T)stoi(input);
-    return;
-  }
-  if(is_same_v<T, float>){
-    a = stof(input);
-    return;
-  }
-  if(is_same_v<T, double>){
-    a = stod(input);
-    return;
-  }
+  }while(error_input);
+  a = (T)stod(input);
 }
 
-/*
-About the Big num_input above is very Big.
-I wiil try to optimised a bit.
-the fucntion is developed and inspired by cpu CNZV
-it does have a similiar boolen to check user input format flow and format.
-i design this to make sure user can a correct input,
-not: 
-.2
-2.
-other false inputs
-*/
-
 // end num convert
+
+void display(const unsigned short& person_num, const customer* const arry_cust) {
+  unsigned int total = 0;
+  cout
+  << ">>===============================================<<" << '\n'
+  << "|     |     |     |Order Summary|     |     |     |" << '\n'
+  << ">>===============================================<<" << '\n'                
+  << "|   Description          QTY     Amount(RM)       |" << '\n'
+  << "|================================================<<" << '\n'
+  << "|     Ferry              "<< person_num <<"          "<< total <<"            |" << '\n'
+  << "|                                                 |" << '\n'
+  << ">>===============================================<<" << endl;
+
+}
+void display_vic() {
+  cout
+  << "";
+}
 
 int main(int argc, char* argv[]){
   unsigned short person_num = 0; //danger out of range!!
   char vehicle_choose = '\0';
+  int b;
 
-  unsign_input(person_num,"Enter number of person: ");
+  cout << "\e[1J\e[;H";
+
+  cout
+  << "Price Overview" << '\n'
+  << "/----------------------+--------------------------\\" << '\n'
+  << "|++++++++++++++++++++++|  Ferry |  Train |  Bus   |" << '\n'
+  << "|_________Age__________|__(RM)__|__(RM)__|__(RM)__|" << '\n'
+  << "| 0  - 12 (Children)   |   10   |   8    |   5    |" << '\n'
+  << "| 13 - 17 (Teen)       |   15   |   12   |   10   |" << '\n'
+  << "| 18 - 60 (Adult)      |   25   |   17   |   15   |" << '\n'
+  << "| 60 >    (Senior)     |   12   |   10   |   12   |" << '\n'
+  << "\\----------------------+--------------------------/" << endl;
+
+  cout << endl;
+
+  cout << "+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++" << endl;
+  new_num_input(person_num,"Please Enter The Number Of Person  ------------------------------->> : ");
 
   customer* arry_cust = new customer[person_num];
 
-  cout << "Enter a trip-code: ";
+  cout << "Choose Type of Transportation <Bus = B : Train = T : Ferry = F>--->> : ";
   cin >> vehicle_choose;
   cin.ignore(MAX_STREAM_SIZE,'\n');
 
+  cout << "+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++" << endl;
+  cout << endl;
+
+  if(vehicle_choose == 'f') Ferry selected_vechicle;
+
   for(unsigned int i = 0;i < person_num;i++){
     //cout << "\e[1J\e[;H";
-    cout<< "person #" << i+1 <<endl;
+    cout
+    << "/++++++++++++++++++++++++++++++++++++++++++++++++++++" << '\n'
+    << "|              Form For <<Ferry>> #" << i+1 << endl;
     arry_cust[i].input_field();
+    cout
+    << "\\++++++++++++++++++++++++++++++++++++++++++++++++++++" << endl;
+    cout << endl;
   }
+  cout << "=====================================================================================" << endl;
   cout << endl;
   for(unsigned int i = 0;i < person_num;i++){
-    cout << "Display: person #" << i+1 << endl;
+    cout
+    <<"//===============================\\\\" << '\n'
+    <<"| Description Form #" << i+1 << "             |" << '\n'
+    <<"|                                 |" << endl;
     arry_cust[i].display();
+    cout
+    << "\\\\===============================//" << endl;
+    cout << endl;
   }
+  display(person_num,arry_cust);
+  delete [] arry_cust;
   return 0;
 }
