@@ -1,3 +1,5 @@
+#include <iomanip>
+#include <ios>
 #include <iostream>
 #include <istream>
 #include <sstream>
@@ -25,41 +27,54 @@ using namespace std;
 
 constexpr auto MAX_STREAM_SIZE = std::numeric_limits<std::streamsize>::max();
 
-class customer {
+//function covert num
+
+template <typename T>
+void new_num_input(T& a,string&& out = "input : ",string&& err = "Error Input!!"){
+  bool error_input;
+  double test;
+  do{
+    string input;
+    error_input = false;
+    cout << out;
+    getline(cin,input);
+    input.erase(0,input.find_first_not_of(" \t"));
+    input.erase(input.find_last_not_of(" \t")+1);
+    istringstream iss(input);
+    if(input.empty()){
+      error_input = true;
+      continue;
+    }
+    if(!(iss >> test) || !iss.eof()){
+      cerr << "\e[1;31m"<<err<<"\e[0m" << endl;
+      error_input = true;
+      continue;
+    }
+    if(is_unsigned_v<T> && test < 0){
+      cerr << "\e[1;31m"<<err<<"\e[0m" << endl;
+      error_input = true;
+    }
+  }while(error_input);
+  a = (T)test;
+}
+
+// end num convert
+
+class Customer {
   bool legacy_sex = false;
   unsigned short age = 0;
-  string name, phone;
+  float cust_price = 0;
+  string cust_name, phone;
   public:
 
   void set_name() {
-    getline(cin,name);
+    getline(cin,cust_name);
+      cust_name.erase(0,cust_name.find_first_not_of(" \t"));
+      cust_name.erase(cust_name.find_last_not_of(" \t")+1);
   }
 
   void set_age() {
-    bool error_input = false;
-    string input;
-    do{
-      error_input = false;
-      input.clear();
-      cout << "|  Age                                 : ";
-      getline(cin,input);
-      if(input == ""){
-        error_input = true;
-        continue;
-      }
-      for(const char& i:input){
-        if((int)i < 33){
-          continue;
-        }else if((int)i < 58 && (int)i > 47){
-          continue;
-        }else{
-          cerr << "\e[1;31mError Age!!\e[0m" << endl;
-          error_input = true;
-          break;
-        }
-      }
-    }while(error_input);
-    age = stoi(input);
+    new_num_input(age,"|  Age                                 : ","Error Age!!");
   }
 
   void set_phone() {
@@ -69,6 +84,8 @@ class customer {
       phone.clear();
       cout << "|  Phone                               : ";
       getline(cin,phone);
+      phone.erase(0,phone.find_first_not_of(" \t"));
+      phone.erase(phone.find_last_not_of(" \t")+1);
       if(phone.size() != 8) input_error = true;
       for(const char& i:phone){
         if((int)i < 33) continue;
@@ -85,17 +102,13 @@ class customer {
       good = 0;
       bad = 0;
       input_error = false;
+      input.clear();
       cout << "|  Gender << F = Female : M = Male >>  : ";
       getline(cin,input);
+      input.erase(0,input.find_first_not_of(" \t"));
+      input.erase(input.find_last_not_of(" \t")+1);
       for(const char& i:input){
         switch(i) {
-          case '\n':
-          case ' ':
-          case '\t':
-          case '\r':
-          case '\f':
-          case '\v':
-            break;
           case '0':
           case 'F':
           case 'f':
@@ -126,49 +139,68 @@ class customer {
     return 0;
   }
 
+  string Age_Category() const {
+    if(age < 13) return "Children";
+    else if(age < 18) return "Teen";
+    else if(age < 61) return "Adult";
+    else return "Senior";
+  }
+
   void input_field() {
     cout << "|  Name                                : ";
     set_name();
     set_age();
+    if(age > 999) cout << "\e[1;93mThis is quite some Great Mage age...\n\e[0m";
     set_sex();
     set_phone();
   }
   
-  void display() const {
+  float price() const {
+    return cust_price;
   }
+
+  void price(const float price){
+    this->cust_price = price;
+  }
+
+  void display() const {
+    cout
+    <<"| Name           : "<<setw(15)<<cust_name<<"|"<<'\n'
+    <<"| Gender         : "<<setw(15)<<((legacy_sex == false) ? "Female" : "Male")<<"|"<<'\n'
+    <<"| Age Category   : "<<setw(15)<<Age_Category()<<"|"<<'\n';
+  }
+
+  friend class Vehicle;
 };
 
-class vehicle {
+class Vehicle {
   protected:
-  string name, from_destination , to_destination;
-  unsigned int price = 0;
+  string name;
+  unsigned int price[4];
   public:
-  unsigned int get_price();
-  void display();
-
-  void choose_day();
+  void get_price(Customer& cust) const { 
+    if(cust.age < 13) cust.cust_price = price[0];
+    else if(cust.age < 18) cust.cust_price = price[1];
+    else if(cust.age < 61) cust.cust_price = price[2];
+    else cust.cust_price = price[3];
+  }
+  string display() const {
+    return name;
+  }
 
 };
 
-class Ferry : public vehicle {
+class Ferry : public Vehicle {
   public:
 
-  Ferry() = default;
-
-  Ferry(unsigned short age){
-    if (age <= 12) price = 10;
-    else if (age <= 17) price = 15;
-    else if (age <= 60) price = 25;
-    else price = 12;
+  Ferry(){
+    name = "Ferry";
+    price[0] = 10;
+    price[1] = 15;
+    price[2] = 25;
+    price[3] = 12;
   }
 
-  unsigned int get_price() const { 
-    return price; 
-  }
-
-  void display() const {
-    cout << "Ferry" << endl;
-  }
   /*
   void display() const override { // example of AI faulty code
     cout << "Ferry" << endl;
@@ -176,65 +208,47 @@ class Ferry : public vehicle {
   */
 };
 
-//function covert num
+class Bus : public Vehicle {
+  public:
 
-template <typename T>
-void new_num_input(T& a,string&& out = "input : "){
-  bool error_input;
-  string input;
-  double test;
-  do{
-    error_input = false;
-    input.clear();
-    cout << out;
-    getline(cin,input);
-    input.erase(0,input.find_first_not_of(" \t"));
-    input.erase(input.find_last_not_of(" \t")+1);
-    istringstream iss(input);
-    if(input.empty()){
-      error_input = true;
-      continue;
-    }
-    if(!(iss >> test) || !iss.eof()){
-      cerr << "\e[1;31mError Input!!\e[0m" << endl;
-      error_input = true;
-      continue;
-    }
-    if(is_unsigned_v<T> && test < 0){
-      cerr << "\e[1;31mError Input!!\e[0m" << endl;
-      error_input = true;
-    }
-  }while(error_input);
-  a = (T)stod(input);
-}
+  Bus(){
+    name = "Bus";
+    price[0] = 5;
+    price[1] = 10;
+    price[2] = 15;
+    price[3] = 12;
+  }
 
-// end num convert
+};
 
-void display(const unsigned short& person_num, const customer* const arry_cust) {
-  unsigned int total = 0;
+class Train : public Vehicle {
+  public:
+
+  Train(){
+    name = "Train";
+    price[0] = 8;
+    price[1] = 12;
+    price[2] = 17;
+    price[3] = 10;
+  }
+
+};
+
+void display(const unsigned short& person_num, const Customer* const arry_cust, const Vehicle* const vec) {
+  float total = 0;
+  for(int i = 0;i<person_num;i++) total += arry_cust[i].price();
   cout
   << ">>===============================================<<" << '\n'
   << "|     |     |     |Order Summary|     |     |     |" << '\n'
   << ">>===============================================<<" << '\n'                
   << "|   Description          QTY     Amount(RM)       |" << '\n'
   << "|================================================<<" << '\n'
-  << "|     Ferry              "<< person_num <<"          "<< total <<"            |" << '\n'
+  << "|     "<<setw(19)<<vec->display()<<setw(11)<<person_num<<setw(14)<<total<<"|"<< '\n'
   << "|                                                 |" << '\n'
   << ">>===============================================<<" << endl;
 
 }
 void display_vic() {
-  cout
-  << "";
-}
-
-int main(int argc, char* argv[]){
-  unsigned short person_num = 0; //danger out of range!!
-  char vehicle_choose = '\0';
-  int b;
-
-  cout << "\e[1J\e[;H";
-
   cout
   << "Price Overview" << '\n'
   << "/----------------------+--------------------------\\" << '\n'
@@ -245,32 +259,76 @@ int main(int argc, char* argv[]){
   << "| 18 - 60 (Adult)      |   25   |   17   |   15   |" << '\n'
   << "| 60 >    (Senior)     |   12   |   10   |   12   |" << '\n'
   << "\\----------------------+--------------------------/" << endl;
+}
+
+Vehicle* choose_vec(){
+  Vehicle* selected_vehicle;
+  bool error_input = false;
+  do{
+    string input;
+    error_input = false;
+    cout << "Choose Type of Transportation <Bus = B : Train = T : Ferry = F>--->> : ";
+    getline(cin,input);
+    input.erase(0,input.find_first_not_of(" \t"));
+    input.erase(input.find_last_not_of(" \t")+1);
+    if(input.empty()){
+      error_input = true;
+      continue;
+    }
+    if(input.size() != 1){
+      error_input = true;
+      cerr << "\e[1;31mError Input!!\e[0m" << endl; 
+      continue;
+    }
+    switch (input[0]) {
+      case 'B':
+      case 'b':
+        selected_vehicle = new Bus;
+        break;
+      case 'T':
+      case 't':
+        selected_vehicle = new Train;
+        break;
+      case 'F':
+      case 'f':
+        selected_vehicle = new Ferry;
+        break;
+      default:
+        error_input = true;
+        cerr << "\e[1;31mError Input!!\e[0m" << endl; 
+    }
+  }while (error_input);
+  return selected_vehicle;
+}
+
+int main(int argc, char* argv[]){
+  unsigned short person_num = 0; //danger out of range!!
+  Vehicle* selected_vehicle;
+
+  cout << "\e[2J\e[;H";
+
+  cout << left; // Input manip here
+
+  display_vic();
 
   cout << endl;
-
   cout << "+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++" << endl;
   new_num_input(person_num,"Please Enter The Number Of Person  ------------------------------->> : ");
-
-  customer* arry_cust = new customer[person_num];
-
-  cout << "Choose Type of Transportation <Bus = B : Train = T : Ferry = F>--->> : ";
-  cin >> vehicle_choose;
-  cin.ignore(MAX_STREAM_SIZE,'\n');
-
+  Customer* arry_cust = new Customer[person_num];
+  selected_vehicle = choose_vec();
   cout << "+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++" << endl;
   cout << endl;
-
-  if(vehicle_choose == 'f') Ferry selected_vechicle;
 
   for(unsigned int i = 0;i < person_num;i++){
     //cout << "\e[1J\e[;H";
     cout
     << "/++++++++++++++++++++++++++++++++++++++++++++++++++++" << '\n'
-    << "|              Form For <<Ferry>> #" << i+1 << endl;
+    << "|              Form For <<"<<selected_vehicle->display()<<">> #" << i+1 << endl;
     arry_cust[i].input_field();
     cout
     << "\\++++++++++++++++++++++++++++++++++++++++++++++++++++" << endl;
     cout << endl;
+    selected_vehicle->get_price(arry_cust[i]);
   }
   cout << "=====================================================================================" << endl;
   cout << endl;
@@ -281,10 +339,12 @@ int main(int argc, char* argv[]){
     <<"|                                 |" << endl;
     arry_cust[i].display();
     cout
+    << "| Transportation : "<<setw(15)<<selected_vehicle->display()<<"|" << '\n'
+    << "| Price          : RM "<<setw(12)<<arry_cust[i].price()<<"|"<<'\n'
     << "\\\\===============================//" << endl;
     cout << endl;
   }
-  display(person_num,arry_cust);
+  display(person_num,arry_cust,selected_vehicle);
   delete [] arry_cust;
   return 0;
 }
